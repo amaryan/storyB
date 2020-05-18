@@ -8,8 +8,12 @@ var firstY = 0
 var firstX = 0
 var tim = 0
 var text;
-var textTime;
-var timedEvent;
+var textTime
+var timedEvent
+var bear
+var monkey
+var crocodile
+var alienLife = 3
  class GameScene extends Phaser.Scene {
   constructor () {
     super({ key: 'GameScene' })
@@ -22,89 +26,58 @@ var timedEvent;
   //el fondo
     mouseInput = this.input
     this.add.image(400,300,'background')
-    //const dragText = this.add.dynamicBitmapText(this.sys.game.config.width/2,this.sys.game.config.height-40,'Bangers','DRAG THE BEAR TO THE BOARD!!',30).setOrigin(0.5);
-      /*  this.tweens.add({
-            targets: dragText,
-            alpha: 0,
-            ease: (x) => x < 0.5 ? 0 : 1,
-            duration: 500,
-            yoyo: true,
-            repeat: -1
-        });*/
     text = this.add.text(250, 400, 'Arrastra el oso hacia delante!!', {
       font: '30px Bangers',
       fill: '#7744ff'
     })
     //el enemigo 
-    this.alien = new Character({
+    var alien = this.alien
+    alien = new Character({
       scene: this,
       x: 400,
       y: 200,
       asset: 'alien'
     })
-    //Las cartas para arrastrar
-    var bear = this.bear
-    bear = new Character({
-      scene: this,
-      x: 80,
-      y: 700,
-      asset: 'bear'
-    })
-    firstY = bear.y
-    firstX = bear.x 
-    console.log(firstX,firstY)
+    
 
-   
-    this.dog = new Character({
+   var dog = this.dog
+   dog = new Character({
       scene: this,
       x: 300,
       y: 690,
       asset: 'dog'
     })
-
-    this.frog = new Character({
+    var frog = this.frog
+    frog = new Character({
       scene: this,
       x: 500,
       y: 700,
       asset: 'frog'
     })
-
-    this.gorilla = new Character({
+    var gorilla = this.gorilla
+    gorilla = new Character({
       scene: this,
       x: 700,
       y: 700,
       asset: 'gorilla'
     })
     
-    //El tablero definido con un espacio en blanco 
-    var crocodile = this.crocodile
-    crocodile = new Character({
-      scene: this,
-      x: 180,
-      y: 500,
-      asset: 'crocodile'
-    })
-    
-    var monkey = this.monkey
-    monkey = new Character({
-      scene: this,
-      x: 640,
-      y: 500,
-      asset: 'monkey'
-    })
-
+    bear = this.physics.add.sprite(80,700,'bear')
+    //bear.setGravityY(-1)
+    //con esto eliminamos la gravedad del oso pero aun asi sigue teniendo fisica para poder atacar
+    bear.body.setAllowGravity(false)
+    crocodile = this.physics.add.sprite(180,500,'crocodile')
+    crocodile.body.setAllowGravity(false)
+    monkey = this.physics.add.sprite(640,500,'monkey')
+    monkey.body.setAllowGravity(false)
+    this.physics.add.collider(bear,alien)
+    this.physics.add.collider(bear,alien,crocodile,monkey)
+    //Las cartas para arrastrar
+    firstY = bear.y
+    firstX = bear.x 
+    console.log(firstX,firstY)
     dragBear(bear)
-   /* group = this.add.group({
-      classType: Phaser.GameObjects.Image,
-      defaultKey: null,
-      defaultFrame: null,
-      active: true,
-      maxSize: -1,
-      runChildUpdate: false,
-      createCallback: null,
-      removeCallback: null,
-      createMultipleCallback: null
-  })*/
+  
  textTime = this.add.text(32,32,'', {
   font: '30px Bangers',
   fill: '#7744ff'
@@ -116,19 +89,25 @@ var timedEvent;
  })
  textTime.setText('La batalla comienza en 5 segundos!')
 
-  
    this.add.existing(bear)
-   this.add.existing(this.alien)
-   this.add.existing(this.dog)
-   this.add.existing(this.frog)
-   this.add.existing(this.gorilla)
+   this.add.existing(alien)
+   this.add.existing(dog)
+   this.add.existing(frog)
+   this.add.existing(gorilla)
    this.add.existing(crocodile)
    this.add.existing(monkey)
-  
+   
+   //Hago esto para poder usarlos bien en las funciones de momento
+   this.dog = dog
+   this.bear = bear
+   this.gorilla = gorilla
+   this.frog = frog
+   this.crocodile = crocodile
+   this.monkey = monkey
   /* group.add(bear)
    group.add(monkey)
    group.add(crocodile)*/
-
+ //this.input.on('pointerdown',this.jump, this)
   }
   update(){
     //textTime.setText('Tiempo transcurrido:  '+timedEvent.getProgress().toString().substr(0,4))
@@ -162,10 +141,37 @@ function dragBear(bear){
 
 function startBattle(){
   //console.log('termino el time')
-  text.setText('')
-  textTime.setText('La batalla ha comenzado!!')
+  text.setText('La batalla ha comenzado!!')
+  textTime.setText('')
+  //No se porque se sigue pudiendo arrastrar si lo he puesto en false
+ // this.bear.setInteractive({ draggable:  false})
+  this.dog.visible = false
+  this.frog.visible = false
+  this.gorilla.visible = false
+  //El ataque del oso
+  this.tweens.add({
+    targets: this.bear,
+    y: 200,
+    duration: 500,
+    ease: function (t){
+      return Math.pow(Math.sin( t*3),3);
+    },
+    delay: 500,
+    repeat : 2
+  })
+
+ 
  
 
+}
+function killAlien(){
+  alienLife--
+  if(alienLife<0){
+    this.bear.visible = false
+    this.crocodile.visible = false
+    this.monkey.visible = false
+    text.setText('Victoria!!')
+  }
 }
 
 
