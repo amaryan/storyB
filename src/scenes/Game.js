@@ -162,6 +162,7 @@ var alienTween
 
 function startBattle(){
   text.setText('Click to start!')
+  textTime.destroy()
   //Si el usuario no movio la ficha se coloca sola
   bear.y = 500
   bear.x = 400
