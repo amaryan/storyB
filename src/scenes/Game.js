@@ -36,7 +36,7 @@ var alienTween
   create () {
   
   //el fondo
- 
+  
     mouseInput = this.input
     this.add.image(400,300,'background')
     text = this.add.text(250, 380, 'Drag the bear to the board', {
@@ -80,10 +80,20 @@ var alienTween
     giraffe.setVisible(false)
     moose.setVisible(false)
     button1.visible = false
+    /**
+     * Aqui voy a hacer los tween de los animalillos
+     * 
+     */
+    
 
-
+    dog.setInteractive().on('pointerdown', function(pointer, localX, localY, event){
+      // ...
+      dog.setScale(.5)
+  });
     bear.setInteractive({ draggable:  true})
+    
     bear.on('drag',function(pointer, gameObject, dragX, dragY){
+      
     //Arrastro dependiendo de la posicion del raton
     bear.x = mouseInput.x
     bear.y = mouseInput.y  
@@ -97,7 +107,10 @@ var alienTween
       bear.y = 700
       bear.x = 80
     }
+   
+    
   })
+  
  
 //Aqui tenemos el temporizador de 5 segundos (Tengo que poner esto en un texto para que se vea el tiempo pasar en el juego)
   timedEvent = this.time.addEvent({
@@ -106,7 +119,6 @@ var alienTween
     callbackScope: this
   })
 
-  console.log()
      //Los diferentes textos que iran apareciendo 
   textTime = this.add.text(32,32,'', {
     font: '30px Bangers',
@@ -136,6 +148,30 @@ var alienTween
    this.add.existing(heart2)
    this.add.existing(heart3)
 
+   this.tweens.add({
+    targets: [alien,heart1,heart2,heart3],
+    duration: 800,
+    x: '500',
+    repeat: -1,
+    yoyo: true,
+    ease: 'Sine.easeInOut',
+    delay : function (i, total, target){
+      return i * 100
+    }
+  })
+  this.tweens.add({
+    targets: [dog,frog,gorilla,bear,crocodile,monkey],
+    duration: 1000,
+    repeat: -1,
+    yoyo: true,
+    rotation: 0.4,
+    ease: 'Sine.easeInOut',
+    delay : function (i, total, target){
+      return i * 100
+    }
+  })
+  //this.tweens.add
+  
    downloadText = this.add.text(320,477,'', {
     font: '30px Bangers',
     fill: '#DA6134'
@@ -154,7 +190,10 @@ var alienTween
    this.heart1 = heart1
    this.heart2 = heart2
    this.heart3 = heart3
+  
   }
+
+
   update(){
     
   }
