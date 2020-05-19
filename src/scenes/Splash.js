@@ -19,6 +19,9 @@ export default class extends Phaser.Scene {
     this.load.image('monkey','assets/images/animal/monkey.png')
     this.load.image('mushroom','assets/images/mushroom2.png')
     this.load.image('button','assets/images/button.png')
+    this.load.image('moose','assets/images/moose.png')
+    this.load.image('giraffe','assets/images/giraffe.png')
+
   }
 
   create () {

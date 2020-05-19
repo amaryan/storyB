@@ -7,7 +7,7 @@ import Character from '../sprites/Character'
 var mouseInput 
 var firstY = 0
 var firstX = 0
-var tim = 0
+var position = false
 var text;
 var textTime
 var timedEvent
@@ -16,8 +16,10 @@ var bear
 var monkey
 var crocodile
 var alien
-var alienLife = 35
-var button
+var giraffe
+var moose
+var alienLife = 3
+var button1
 var downloadText
 var titleText
  class GameScene extends Phaser.Scene {
@@ -30,6 +32,7 @@ var titleText
   create () {
   
   //el fondo
+ 
     mouseInput = this.input
     this.add.image(400,300,'background')
     text = this.add.text(250, 400, 'Arrastra el oso hacia delante!!', {
@@ -59,46 +62,62 @@ var titleText
       asset: 'gorilla'
     })
     
-    bear = this.physics.add.sprite(80,700,'bear')
-    //bear.setGravityY(-1)
-    //con esto eliminamos la gravedad del oso pero aun asi sigue teniendo fisica para poder atacar
-    bear.body.setAllowGravity(false)
-    alien = this.physics.add.sprite(400,200,'alien')
-    alien.body.setAllowGravity(false)
-    crocodile = this.physics.add.sprite(180,500,'crocodile')
-    crocodile.body.setAllowGravity(false)
-    monkey = this.physics.add.sprite(640,500,'monkey')
-    monkey.body.setAllowGravity(false)
-    
-    //Las cartas para arrastrar
-    firstY = bear.y
-    firstX = bear.x 
-    console.log(firstX,firstY)
-    dragBear(bear)
-  
- textTime = this.add.text(32,32,'', {
-  font: '30px Bangers',
-  fill: '#7744ff'
-});
- timedEvent = this.time.addEvent({
-   delay: 5000,
-   callback: startBattle,
-   callbackScope: this
- })
- textTime.setText('La batalla comienza en 5 segundos!')
- finalText = this.add.text(600,700,'', {
-  font: '50px Bangers',
-  fill: '#DAAF34'
-});
-  titleText = this.add.text(200,280,'', {
-  font: '80px Bangers',
-  fill: '#74A016'
-});
+    bear = this.add.image(80,700,'bear')
+    alien = this.add.image(400,200,'alien')
+    crocodile = this.add.image(180,500,'crocodile')
+    monkey = this.add.image(640,500,'monkey')
+    button1 = this.add.image(400,500,'button')
+    giraffe = this.add.image(500,220,'giraffe')
+    moose = this.add.image(300,220,'moose')
+
+    giraffe.setVisible(false)
+    moose.setVisible(false)
+    button1.visible = false
 
 
-  button = this.add.image(400,500,'button')
-  this.add.existing(button)
-  button.visible = false
+    bear.setInteractive({ draggable:  true})
+    bear.on('drag',function(pointer, gameObject, dragX, dragY){
+    //Arrastro dependiendo de la posicion del raton
+    bear.x = mouseInput.x
+    bear.y = mouseInput.y  
+   //controlo que no se salga sus dos posibles casillas
+    if(bear.y<650 || bear.x > 150 ){
+      bear.y = 500
+      bear.x = 400
+      console.log('estoy aqui')  
+    }else{
+      bear.x = 80
+      bear.y = 700
+    }
+  })
+//Aqui tenemos el temporizador de 5 segundos (Tengo que poner esto en un texto para que se vea el tiempo pasar en el juego)
+  timedEvent = this.time.addEvent({
+    delay: 5000,
+    callback: startBattle,
+    callbackScope: this
+  })
+     //Los diferentes textos que iran apareciendo 
+    textTime = this.add.text(32,32,'', {
+      font: '30px Bangers',
+      fill: '#7744ff'
+    });
+    textTime.setText('La batalla comienza en 5 segundos!')
+    finalText = this.add.text(600,700,'', {
+      font: '50px Bangers',
+      fill: '#DAAF34'
+    });
+
+
+
+    titleText = this.add.text(200,280,'', {
+      font: '80px Bangers',
+      fill: '#74A016'
+    });
+
+//Añadimos las cositas para que se vean (o para exactamente lo contrario)
+
+
+   this.add.existing(button1)
    this.add.existing(bear)
    this.add.existing(alien)
    this.add.existing(dog)
@@ -106,6 +125,8 @@ var titleText
    this.add.existing(gorilla)
    this.add.existing(crocodile)
    this.add.existing(monkey)
+   this.add.existing(moose)
+   this.add.existing(giraffe)
    downloadText = this.add.text(320,477,'', {
     font: '30px Bangers',
     fill: '#DA6134'
@@ -117,100 +138,82 @@ var titleText
    this.frog = frog
    this.crocodile = crocodile
    this.monkey = monkey
-  /* group.add(bear)
-   group.add(monkey)
-   group.add(crocodile)*/
- //this.input.on('pointerdown',this.jump, this)
- bear.setCollideWorldBounds(true)
- this.physics.add.collider(bear,alien,killAlien).name = 'enemies'
-
+   this.button1 = button1
+   this.moose = moose
+   this.giraffe = giraffe
   }
   update(){
-    //textTime.setText('Tiempo transcurrido:  '+timedEvent.getProgress().toString().substr(0,4))
-  }
-}
-
-
-// Aqui controlamos que el oso este en sus dos posibles casillas
-function dragBear(bear){
-  bear.setInteractive({ draggable:  true})
-  bear.on('drag',function(pointer, gameObject, dragX, dragY){
-    console.log('me has intentado arrastrar')
-    bear.x = mouseInput.x
-    bear.y = mouseInput.y
-   
-   //controlo que no se salga sus dos posibles casillas
-    if(bear.y<650 || bear.x > 150 ){
-      bear.y = 500
-      bear.x = 400
-      console.log('estoy aqui')
-      return
-
-    }else{
-      bear.x = 80
-      bear.y = 700
-    }
     
-    console.log('la x: '+bear.x+' la y: '+bear.y)
-  })
+  }
 }
 
 function startBattle(){
-  //console.log('termino el time')
-  text.setText('La batalla ha comenzado!!')
+  text.setText('Haz click para empezar!')
+  this.input.on('pointerdown', function (pointer) {
+
+    console.log('down');
+    textTime.setText('')
+    //No se porque se sigue pudiendo arrastrar si lo he puesto en false
+   // this.bear.setInteractive({ draggable:  false})
+    this.dog.visible = false
+    this.frog.visible = false
+    this.gorilla.visible = false
+    //El ataque del oso
+   // console.log(alienLife)
+   //Animacion del oso atacando hacia la posicion del alien
+    this.tweens.add({
+      targets: this.bear,
+      y: 200,
+      duration: 500,
+      //Cada vez que realiza la accion llama al metodo que resta vida al alien
+      onUpdateCallback: killAlien,
+      ease: function (t){
+        return Math.pow(Math.sin( t*3),3);
+      },
+      delay: 500,
+      repeat : 3
+    })
+    text.setText('')
+   
+}, this);
+ 
+
+}
+
+function failedGame(){
+  text.setText('Se te ha acabado el tiempo... Intentalo de nuevo!')
   textTime.setText('')
   //No se porque se sigue pudiendo arrastrar si lo he puesto en false
  // this.bear.setInteractive({ draggable:  false})
   this.dog.visible = false
   this.frog.visible = false
   this.gorilla.visible = false
-  //El ataque del oso
- // console.log(alienLife)
-  this.tweens.add({
-    targets: this.bear,
-    y: 200,
-    duration: 500,
-    ease: function (t){
-      return Math.pow(Math.sin( t*3),3);
-    },
-    delay: 500,
-    repeat : 2
-  })
-  text.setText('')
- 
 
+  this.registry.destroy(); // destroy registry
+  this.events.off();﻿ // disable all active events
+  this.scene.restart();﻿﻿﻿﻿ // restart current scene
 }
-function killAlien (bear, alien){
-  //console.log(alienLife)
-
-  if(bear.body.checkCollision.up = true){
+function killAlien (){
+  console.log(alienLife)
+  if(alienLife > 0){
     alienLife--
-    console.log(alienLife)
-      if(alienLife<0){
-        bear.visible = false
-        crocodile.visible = false
-        monkey.visible = false
-        titleText.setText('SAFARY ATTACK')
-        finalText.setText('VICTORY!!!')
-        downloadText.setText('DOWNLOAD HERE')
-        button.visible = true
-          bear.destroy()
-          alien.destroy()
-          
-        if(alienLife<-1){
-          
-          alien = null
-          bear = null
-    }
-    
-  }else{
-    console.log('No me ha tocaaaao')
+    console.log('La vida del alien es de: '+alienLife)
+  }else if(alienLife == 0){
+      finalScreen()
   }
-  
-  
-}
-}
 
-
+}
+function finalScreen(){
+  bear.visible = false
+  crocodile.visible = false
+  monkey.visible = false
+  alien.visible = false
+  titleText.setText('SAFARY ATTACK')
+  finalText.setText('VICTORY!!!')
+  downloadText.setText('DOWNLOAD HERE')
+ button1.visible = true
+ giraffe.setVisible(true)
+ moose.setVisible(true)
+}
 
 export default GameScene;
