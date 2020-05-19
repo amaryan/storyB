@@ -39,7 +39,7 @@ var alienTween
  
     mouseInput = this.input
     this.add.image(400,300,'background')
-    text = this.add.text(250, 380, 'Arrastra el oso hacia delante!!', {
+    text = this.add.text(250, 380, 'Drag the bear to the board', {
       font: '30px Bangers',
       fill: '#4A70DE'
     })
@@ -112,7 +112,7 @@ var alienTween
     font: '30px Bangers',
     fill: '#74A016'
     });
- textTime.setText('La batalla comienza en 5 segundos')
+ textTime.setText('The battle starts in 5 seconds')
     finalText = this.add.text(280,360,'', {
     font: '80px Bangers',
     fill: '#C85213'
