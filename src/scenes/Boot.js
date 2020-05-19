@@ -11,9 +11,9 @@ export default class extends Phaser.Scene {
     this.fontsLoaded = this.fontsLoaded.bind(this)
     this.add.text(100, 100, 'loading fonts...')
 
-    this.load.image('loaderBg', './assets/images/loader-bg.png')
-    this.load.image('loaderBar', './assets/images/loader-bar.png')
-    this.load.json('fontJSON','../../assets/font.json');
+   // this.load.image('loaderBg', './assets/images/loader-bg.png')
+    //this.load.image('loaderBar', './assets/images/loader-bar.png')
+   // this.load.json('fontJSON','../../assets/font.json');
 
   
       //Con esto importamos la fuente que esta ya creada

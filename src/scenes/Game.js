@@ -22,6 +22,10 @@ var alienLife = 3
 var button1
 var downloadText
 var titleText
+var heart1
+var heart2
+var heart3
+var alienTween
  class GameScene extends Phaser.Scene {
   constructor () {
     super({ key: 'GameScene' })
@@ -35,9 +39,9 @@ var titleText
  
     mouseInput = this.input
     this.add.image(400,300,'background')
-    text = this.add.text(250, 400, 'Arrastra el oso hacia delante!!', {
+    text = this.add.text(250, 380, 'Arrastra el oso hacia delante!!', {
       font: '30px Bangers',
-      fill: '#7744ff'
+      fill: '#4A70DE'
     })
   
    var dog = this.dog
@@ -69,6 +73,9 @@ var titleText
     button1 = this.add.image(400,500,'button')
     giraffe = this.add.image(500,220,'giraffe')
     moose = this.add.image(300,220,'moose')
+    heart1 = this.add.image(350,110,'heart')
+    heart2 = this.add.image(400,110,'heart')
+    heart3 = this.add.image(450,110,'heart')
 
     giraffe.setVisible(false)
     moose.setVisible(false)
@@ -84,39 +91,37 @@ var titleText
     if(bear.y<650 || bear.x > 150 ){
       bear.y = 500
       bear.x = 400
+     
       console.log('estoy aqui')  
     }else{
-      bear.x = 80
       bear.y = 700
+      bear.x = 80
     }
   })
+ 
 //Aqui tenemos el temporizador de 5 segundos (Tengo que poner esto en un texto para que se vea el tiempo pasar en el juego)
   timedEvent = this.time.addEvent({
     delay: 5000,
     callback: startBattle,
     callbackScope: this
   })
+
+  console.log()
      //Los diferentes textos que iran apareciendo 
-    textTime = this.add.text(32,32,'', {
-      font: '30px Bangers',
-      fill: '#7744ff'
+  textTime = this.add.text(32,32,'', {
+    font: '30px Bangers',
+    fill: '#74A016'
     });
-    textTime.setText('La batalla comienza en 5 segundos!')
-    finalText = this.add.text(600,700,'', {
-      font: '50px Bangers',
-      fill: '#DAAF34'
-    });
+ textTime.setText('La batalla comienza en 5 segundos')
+    finalText = this.add.text(280,360,'', {
+    font: '80px Bangers',
+    fill: '#C85213'
+  });
 
-
-
-    titleText = this.add.text(200,280,'', {
+  titleText = this.add.text(200,290,'', {
       font: '80px Bangers',
       fill: '#74A016'
-    });
-
-//Añadimos las cositas para que se vean (o para exactamente lo contrario)
-
-
+  });
    this.add.existing(button1)
    this.add.existing(bear)
    this.add.existing(alien)
@@ -127,6 +132,10 @@ var titleText
    this.add.existing(monkey)
    this.add.existing(moose)
    this.add.existing(giraffe)
+   this.add.existing(heart1)
+   this.add.existing(heart2)
+   this.add.existing(heart3)
+
    downloadText = this.add.text(320,477,'', {
     font: '30px Bangers',
     fill: '#DA6134'
@@ -141,6 +150,10 @@ var titleText
    this.button1 = button1
    this.moose = moose
    this.giraffe = giraffe
+   this.alienTween = alienTween
+   this.heart1 = heart1
+   this.heart2 = heart2
+   this.heart3 = heart3
   }
   update(){
     
@@ -148,11 +161,14 @@ var titleText
 }
 
 function startBattle(){
-  text.setText('Haz click para empezar!')
+  text.setText('Click to start!')
+  //Si el usuario no movio la ficha se coloca sola
+  bear.y = 500
+  bear.x = 400
   this.input.on('pointerdown', function (pointer) {
-
+    text.setText('')
     console.log('down');
-    textTime.setText('')
+    //textTime.setText('')
     //No se porque se sigue pudiendo arrastrar si lo he puesto en false
    // this.bear.setInteractive({ draggable:  false})
     this.dog.visible = false
@@ -163,20 +179,46 @@ function startBattle(){
    //Animacion del oso atacando hacia la posicion del alien
     this.tweens.add({
       targets: this.bear,
-      y: 200,
+      y: 150,
       duration: 500,
       //Cada vez que realiza la accion llama al metodo que resta vida al alien
       onUpdateCallback: killAlien,
+      onComplete: eraseHeart1,
       ease: function (t){
         return Math.pow(Math.sin( t*3),3);
       },
-      delay: 500,
-      repeat : 3
+      delay: 800,
+      repeat : 0
     })
-    text.setText('')
-   
+    this.tweens.add({
+      targets: this.monkey,
+      y: 150,
+      duration: 500,
+      //Cada vez que realiza la accion llama al metodo que resta vida al alien
+      onUpdateCallback: killAlien,
+      onComplete: eraseHeart2,
+      ease: function (t){
+        return Math.pow(Math.sin( t*3),3);
+      },
+      delay: 1200,
+      repeat : 0
+    })
+    this.tweens.add({
+      targets: this.crocodile,
+      y: 150,
+      duration: 400,
+      //Cada vez que realiza la accion llama al metodo que resta vida al alien
+      onUpdateCallback: killAlien,
+      onComplete: eraseHeart3,
+      ease: function (t){
+        return Math.pow(Math.sin( t*3),3);
+      },
+      delay: 1400,
+      repeat : 0
+    })
+    //text.setText('')
 }, this);
- 
+
 
 }
 
@@ -194,11 +236,14 @@ function failedGame(){
   this.scene.restart();﻿﻿﻿﻿ // restart current scene
 }
 function killAlien (){
-  console.log(alienLife)
+  //console.log(alienLife)
+  //text.setText('')
   if(alienLife > 0){
     alienLife--
-    console.log('La vida del alien es de: '+alienLife)
-  }else if(alienLife == 0){
+    //console.log('La vida del alien es de: '+alienLife)
+  }else if(alienLife <= 0){
+    console.log('Ded')
+    text.destroy('')
       finalScreen()
   }
 
@@ -212,8 +257,21 @@ function finalScreen(){
   finalText.setText('VICTORY!!!')
   downloadText.setText('DOWNLOAD HERE')
  button1.visible = true
+ giraffe.rotation = +0.5
+ moose.rotation = -0.5
  giraffe.setVisible(true)
  moose.setVisible(true)
+}
+
+function eraseHeart1(){
+  heart1.setVisible(false)
+}
+function eraseHeart2(){
+  heart2.setVisible(false)
+}
+function eraseHeart3(){
+  text.setText('Click to continue!!')
+  heart3.setVisible(false)
 }
 
 export default GameScene;
