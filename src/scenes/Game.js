@@ -5,6 +5,8 @@ import Phaser from 'phaser'
 import Character from '../sprites/Character'
 
 var mouseInput 
+var giraffeTween
+var alienTween
 var firstY = 0
 var firstX = 0
 var position = false
@@ -26,6 +28,7 @@ var heart1
 var heart2
 var heart3
 var alienTween
+var byeCards 
  class GameScene extends Phaser.Scene {
   constructor () {
     super({ key: 'GameScene' })
@@ -86,10 +89,8 @@ var alienTween
      */
     
 
-    dog.setInteractive().on('pointerdown', function(pointer, localX, localY, event){
-      // ...
-      dog.setScale(.5)
-  });
+    dog.setInteractive({ draggable: true})
+    frog.setInteractive({ draggable: true})
     bear.setInteractive({ draggable:  true})
     
     bear.on('drag',function(pointer, gameObject, dragX, dragY){
@@ -111,6 +112,9 @@ var alienTween
     
   })
   
+  
+ 
+  
  
 //Aqui tenemos el temporizador de 5 segundos (Tengo que poner esto en un texto para que se vea el tiempo pasar en el juego)
   timedEvent = this.time.addEvent({
@@ -125,15 +129,15 @@ var alienTween
     fill: '#74A016'
     });
  textTime.setText('The battle starts in 5 seconds')
-    finalText = this.add.text(280,360,'', {
+    finalText = this.add.text(1000,360,'', {
     font: '80px Bangers',
     fill: '#C85213'
-  });
+  }).setOrigin(0,0);
 
-  titleText = this.add.text(200,290,'', {
+  titleText = this.add.text(-1000,290,'', {
       font: '80px Bangers',
       fill: '#74A016'
-  });
+  }).setOrigin(0,0);
    this.add.existing(button1)
    this.add.existing(bear)
    this.add.existing(alien)
@@ -148,7 +152,7 @@ var alienTween
    this.add.existing(heart2)
    this.add.existing(heart3)
 
-   this.tweens.add({
+  this.tweens.add({
     targets: [alien,heart1,heart2,heart3],
     duration: 800,
     x: '500',
@@ -159,18 +163,70 @@ var alienTween
       return i * 100
     }
   })
-  this.tweens.add({
+   this.tweens.add({
     targets: [dog,frog,gorilla,bear,crocodile,monkey],
     duration: 1000,
     repeat: -1,
     yoyo: true,
     rotation: 0.4,
+    delay: 500,
     ease: 'Sine.easeInOut',
     delay : function (i, total, target){
       return i * 100
-    }
+    },
+   /* hold: 1000 Con este ponemos tiempo de espera al final de cada repeticion del tween
+      repeatDelay: 1000 aqui tenemos una pausa antes de que la accion se vuelva a justo repetir
+      completeDelay: lo mismo que antes pero justo antes de acabar
+    onStart: () => console.log ('Start'),
+    onYoyo: () => console.log ('Start'),
+    onComplete: () => console.log ('Start'),
+    onRepeat: () => console.log ('Start')*/
   })
-  //this.tweens.add
+  //Con esta maravilla podemos crear el tween y usarlo desde una funcion o cualquier lado sin que nos de fallitos del scope
+ giraffeTween =  this.tweens.createTimeline();
+ giraffeTween.add({
+   targets: alien,
+   duration: 2000,
+   rotation: 0.05,
+   y: 2000
+ })
+
+ giraffeTween.add({
+  targets: [crocodile,bear,monkey],
+  duration: 200,
+  y: monkey.y-50,
+  yoyo:true,
+  repeat: 3,
+  ease: 'Power0',
+  onComplete : finalScreen
+})
+giraffeTween.add({
+  targets: [titleText,finalText],
+  x: 200,
+  duration: 200,
+  ease: 'Power3',
+  
+})
+/**giraffeTween.add({
+  targets: [titleText,finalText],
+  y: 400,
+  yoyo: true,
+  duration: 200,
+  repeat:1,
+  ease: 'Power3',
+  
+})*//
+ giraffeTween.add({
+    targets: [giraffe,moose],
+    duration: 1000,
+    y: '180',
+    repeat: -1,
+    yoyo: true,
+    ease: 'Power1',
+  })
+  
+  
+  
   
    downloadText = this.add.text(320,477,'', {
     font: '30px Bangers',
@@ -190,13 +246,14 @@ var alienTween
    this.heart1 = heart1
    this.heart2 = heart2
    this.heart3 = heart3
-  
+   
   }
 
 
   update(){
     
   }
+ 
 }
 
 function startBattle(){
@@ -211,19 +268,32 @@ function startBattle(){
     //textTime.setText('')
     //No se porque se sigue pudiendo arrastrar si lo he puesto en false
    // this.bear.setInteractive({ draggable:  false})
-    this.dog.visible = false
+   byeCards = this.tweens.add({
+    targets:  [this.gorilla,this.dog,this.frog],
+    duration: 1000,
+    y: 1000,
+    rotation: 0.4,
+    onComplete: () => {
+      this.gorilla.destroy()
+      this.dog.destroy()
+      this.frog.destroy()
+    }
+   })
+   
+    /*this.dog.visible = false
     this.frog.visible = false
-    this.gorilla.visible = false
+    this.gorilla.visible = false*/
     //El ataque del oso
    // console.log(alienLife)
    //Animacion del oso atacando hacia la posicion del alien
     this.tweens.add({
       targets: this.bear,
-      y: 150,
+      y: 300,
       duration: 500,
       //Cada vez que realiza la accion llama al metodo que resta vida al alien
       onUpdateCallback: killAlien,
-      onComplete: eraseHeart1,
+      callbackScope: this.scene,
+      onComplete: () => heart1.setVisible(false),
       ease: function (t){
         return Math.pow(Math.sin( t*3),3);
       },
@@ -232,11 +302,12 @@ function startBattle(){
     })
     this.tweens.add({
       targets: this.monkey,
-      y: 150,
+      y: 300,
+      x: monkey.x - 150,
       duration: 500,
       //Cada vez que realiza la accion llama al metodo que resta vida al alien
-      onUpdateCallback: killAlien,
-      onComplete: eraseHeart2,
+      onStart: killAlien,
+      onComplete: () => heart2.setVisible(false),
       ease: function (t){
         return Math.pow(Math.sin( t*3),3);
       },
@@ -245,11 +316,13 @@ function startBattle(){
     })
     this.tweens.add({
       targets: this.crocodile,
-      y: 150,
+      y: 300,
+      x: crocodile.x + 150,
       duration: 400,
       //Cada vez que realiza la accion llama al metodo que resta vida al alien
-      onUpdateCallback: killAlien,
-      onComplete: eraseHeart3,
+      onComplete: killAlien,
+      onStart: () => heart3.setVisible(false),
+    
       ease: function (t){
         return Math.pow(Math.sin( t*3),3);
       },
@@ -262,33 +335,25 @@ function startBattle(){
 
 }
 
-function failedGame(){
-  text.setText('Se te ha acabado el tiempo... Intentalo de nuevo!')
-  textTime.setText('')
-  //No se porque se sigue pudiendo arrastrar si lo he puesto en false
- // this.bear.setInteractive({ draggable:  false})
-  this.dog.visible = false
-  this.frog.visible = false
-  this.gorilla.visible = false
 
-  this.registry.destroy(); // destroy registry
-  this.events.off();﻿ // disable all active events
-  this.scene.restart();﻿﻿﻿﻿ // restart current scene
-}
 function killAlien (){
+  console.log(this)
   //console.log(alienLife)
   //text.setText('')
   if(alienLife > 0){
     alienLife--
-    //console.log('La vida del alien es de: '+alienLife)
-  }else if(alienLife <= 0){
-    console.log('Ded')
-    text.destroy('')
-      finalScreen()
+    console.log('La vida del alien es de: '+alienLife)
+  }
+  if(alienLife == 0){
+    giraffeTween.play()
+    console.log('ded')
+    
+    //finalScreen()
   }
 
 }
 function finalScreen(){
+  
   bear.visible = false
   crocodile.visible = false
   monkey.visible = false
@@ -301,17 +366,10 @@ function finalScreen(){
  moose.rotation = -0.5
  giraffe.setVisible(true)
  moose.setVisible(true)
+ console.log(this)
+ 
 }
 
-function eraseHeart1(){
-  heart1.setVisible(false)
-}
-function eraseHeart2(){
-  heart2.setVisible(false)
-}
-function eraseHeart3(){
-  text.setText('Click to continue!!')
-  heart3.setVisible(false)
-}
+
 
 export default GameScene;
